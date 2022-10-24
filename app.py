@@ -44,20 +44,34 @@ fig6=px.scatter(selected_rows,x='Date',y='Production Budget')
 fig7=px.scatter(selected_rows,x='Date',y='Worldwide Gross')
 navbar = dbc.NavbarSimple(
     children=[
-        dbc.NavItem(dbc.NavLink([html.H3([html.I(className="bi bi-github me-2 m-3")])], href="#")),
-        dbc.NavItem(dbc.NavLink([html.H3([html.I(className="bi bi-linkedin me-2 m-3")])], href="#"))
+        
+        html.A(
+            dbc.NavItem(dbc.NavLink(html.H2(html.I(className="bi bi-linkedin me-2 m-3")))),
+            href="https://www.linkedin.com/in/ya%C4%9Fmur-g%C3%BCle%C3%A7-a52111204/"
+        ),
+        html.A(
+            dbc.NavItem(dbc.NavLink(html.H2(html.I(className="bi bi-github me-2 m-3")))),
+            href="https://www.linkedin.com/in/ya%C4%9Fmur-g%C3%BCle%C3%A7-a52111204/"
+        ),
+       html.A(
+            dbc.NavItem(dbc.NavLink(html.H2(html.I(className="bi bi-medium me-2 m-3")))),
+            href="https://medium.com/@yagmurgulec89"
+        ),
+        
     ],
     brand="Created by Yagmur Gulec",
     brand_href="#",
     color="primary",
     dark=True,
 )
+
 app.layout = html.Div([
     navbar,
      dbc.Row([
         html.H1([html.I(className="bi bi-film me-2 m-3"),'Data Visualization for Movies Database',html.I(className="bi bi-film me-2 m-3")]),
         
-    ],className="row text-center px-3 mt-3"),
+        ],
+    className="row text-center px-3 mt-3"),
     dcc.Tabs(id="tabs-example-graph", value='matrix', children=[
         dcc.Tab(label='Scatter Matrix Plot', value='matrix'),
         dcc.Tab(label='Select columns', value='select'),
@@ -75,8 +89,8 @@ def render_content(tab):
         dbc.Row([
             html.H3([html.I(className="bi bi-film me-2 m-3"),'Which features are correlated?',html.I(className="bi bi-film me-2 m-3")]),
             dbc.Col(dbc.Card(dcc.Graph(figure=fig3,id="plot3")),width=12,className="col text-center"),
-            #dbc.Col(dbc.Card(dcc.Graph(figure=fig2,id="plot2")),width=4),
-    ],className="row text-center px-3 mt-3 mb-3"),
+    ],
+    className="row text-center px-3 mt-3 mb-3"),
         ])
     elif tab == 'select':
         return html.Div([
@@ -84,10 +98,8 @@ def render_content(tab):
         html.H3([html.I(className="bi bi-film me-2 m-3"),'3-D Scatter Plot with Selected Axis',html.I(className="bi bi-film me-2 m-3")]),
         dbc.Col(dbc.Card(dcc.Graph(figure=fig1,id="plot")),width=10),
         dbc.Col([
-        
-        
-        dbc.Row([html.H5('Bubble size'),dcc.RadioItems(['Worldwide Gross', 'Production Budget'], 'Production Budget',id='size'),html.H5('X'),dcc.Dropdown(selected_rows.columns, 'Production Budget', id='dropdown_x')],className="text-center mb-3 px-3"),
-        dbc.Row([html.H5('Y'),dcc.Dropdown(selected_rows.columns, 'IMDB Rating', id='dropdown_y')],className="text-center mb-3 px-3"),
+            dbc.Row([html.H5('Bubble size'),dcc.RadioItems(['Worldwide Gross', 'Production Budget'], 'Production Budget',id='size'),html.H5('X'),dcc.Dropdown(selected_rows.columns, 'Production Budget', id='dropdown_x')],className="text-center mb-3 px-3"),
+            dbc.Row([html.H5('Y'),dcc.Dropdown(selected_rows.columns, 'IMDB Rating', id='dropdown_y')],className="text-center mb-3 px-3"),
         ],width=2)
         
         ],className="row text-center px-3 mt-3 mb-3"),
@@ -127,4 +139,4 @@ def update_output(x,y,size):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
