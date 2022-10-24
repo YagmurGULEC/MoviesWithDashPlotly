@@ -51,7 +51,7 @@ navbar = dbc.NavbarSimple(
         ),
         html.A(
             dbc.NavItem(dbc.NavLink(html.H2(html.I(className="bi bi-github me-2 m-3")))),
-            href="https://www.linkedin.com/in/ya%C4%9Fmur-g%C3%BCle%C3%A7-a52111204/"
+            href="https://github.com/YagmurGULEC/MoviesWithDashPlotly"
         ),
        html.A(
             dbc.NavItem(dbc.NavLink(html.H2(html.I(className="bi bi-medium me-2 m-3")))),
