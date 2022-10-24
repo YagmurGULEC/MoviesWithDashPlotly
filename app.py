@@ -2,6 +2,7 @@
 # visit http://127.0.0.1:8050/ in your web browser.
 
 
+from select import select
 from dash import Dash, html, dcc,Input, Output,State
 import plotly.express as px
 import pandas as pd
@@ -27,7 +28,10 @@ selected_rows['Production Budget']=selected_rows['Production Budget'].astype(flo
 selected_rows['Date'] = pd.to_datetime(selected_rows['Release Date'])
 
 selected_rows['Date'] =selected_rows['Date'].apply(lambda x: x.year-100 if x.year>2020 else x.year)
-selected_rows['Profit']=selected_rows['Worldwide Gross']-selected_rows['Production Budget']
+selected_rows['Profit']=(selected_rows['Worldwide Gross']-selected_rows['Production Budget'])/selected_rows['Production Budget']
+
+selected_rows['Profit'] =selected_rows['Profit'].apply(lambda x: 0 if x<0 else x)
+selected_rows['Profit Scale'] =selected_rows['Profit'].apply(lambda x: 0 if x<0 else np.log(x))
 
 fig1 = px.scatter(selected_rows, x=selected_rows['Production Budget'], y=selected_rows['IMDB Rating'])
 
@@ -75,8 +79,8 @@ app.layout = html.Div([
     dcc.Tabs(id="tabs-example-graph", value='matrix', children=[
         dcc.Tab(label='Scatter Matrix Plot', value='matrix'),
         dcc.Tab(label='Select columns', value='select'),
-        dcc.Tab(label='Bugdets of Genres', value='genre'),
-        dcc.Tab(label='Profits in Time', value='profit'),
+        dcc.Tab(label='Bugdets and Revenues of Genres', value='genre'),
+       
     ]),
     html.Div(id='tabs-content-example-graph')
 ])
@@ -87,7 +91,8 @@ def render_content(tab):
     if tab == 'matrix':
         return html.Div([
         dbc.Row([
-            html.H3([html.I(className="bi bi-film me-2 m-3"),'Which features are correlated?',html.I(className="bi bi-film me-2 m-3")]),
+            html.H3(['Which features are correlated?']),
+            html.H3(['Is there any correlation between production budget and IMDB ratings?']),
             dbc.Col(dbc.Card(dcc.Graph(figure=fig3,id="plot3")),width=12,className="col text-center"),
     ],
     className="row text-center px-3 mt-3 mb-3"),
@@ -95,11 +100,11 @@ def render_content(tab):
     elif tab == 'select':
         return html.Div([
             dbc.Row([
-        html.H3([html.I(className="bi bi-film me-2 m-3"),'3-D Scatter Plot with Selected Axis',html.I(className="bi bi-film me-2 m-3")]),
+        html.H3(['Scatter Plot with Selected Axis']),
         dbc.Col(dbc.Card(dcc.Graph(figure=fig1,id="plot")),width=10),
         dbc.Col([
-            dbc.Row([html.H5('Bubble size'),dcc.RadioItems(['Worldwide Gross', 'Production Budget'], 'Production Budget',id='size'),html.H5('X'),dcc.Dropdown(selected_rows.columns, 'Production Budget', id='dropdown_x')],className="text-center mb-3 px-3"),
-            dbc.Row([html.H5('Y'),dcc.Dropdown(selected_rows.columns, 'IMDB Rating', id='dropdown_y')],className="text-center mb-3 px-3"),
+            dbc.Row([html.H5('Bubble size'),dcc.RadioItems(['Worldwide Gross', 'Production Budget'], 'Worldwide Gross',id='size'),html.H5('X'),dcc.Dropdown(selected_rows.columns, 'Running Time (min)', id='dropdown_x')],className="text-center mb-3 px-3"),
+            dbc.Row([html.H5('Y'),dcc.Dropdown(selected_rows.columns, 'US Gross', id='dropdown_y')],className="text-center mb-3 px-3"),
         ],width=2)
         
         ],className="row text-center px-3 mt-3 mb-3"),
@@ -107,7 +112,7 @@ def render_content(tab):
     elif tab == 'genre':
         return html.Div([
             dbc.Row([
-        html.H3([html.I(className="bi bi-film me-2 m-3"),'Which genre is the cheapest and the most profitable?',html.I(className="bi bi-film me-2 m-3")]),
+        html.H3(['Statistical Plot For Genres']),
         dbc.Col(dbc.Card(dcc.Graph(figure=fig4,id="plot4")),width=12,className='col mb-3'),
         dbc.Col(dbc.Card(dcc.Graph(figure=fig5,id="plot5")),width=12,className='col mb-3'),
         #dbc.Col(dbc.Card(dcc.Graph(figure=fig6,id="plot6")),width=12,className='col mb-3'),
@@ -115,17 +120,7 @@ def render_content(tab):
         
         ],className="row text-center px-3 mt-3 mb-3"),
         ])
-    elif tab=='profit':
-        return html.Div([
-            dbc.Row([
-        html.H3([html.I(className="bi bi-film me-2 m-3"),'Time-varying Profit of Cinema',html.I(className="bi bi-film me-2 m-3")]),
-        dbc.Col(dbc.Card(dcc.Graph(figure=fig6,id="plot6")),width=12,className='col mb-3'),
-        dbc.Col(dbc.Card(dcc.Graph(figure=fig7,id="plot7")),width=12,className='col mb-3'),
-        #dbc.Col(dbc.Card(dcc.Graph(figure=fig6,id="plot6")),width=12,className='col mb-3'),
-       
-        
-        ],className="row text-center px-3 mt-3 mb-3"),
-        ])
+    
         
 @app.callback(
     Output('plot', 'figure'),
@@ -134,7 +129,22 @@ def render_content(tab):
     Input('size', 'value'),
 )
 def update_output(x,y,size):
-    fig1 = px.scatter(selected_rows, x=x, y=y,color='Major Genre',size=size)
+    fig1 = px.scatter(selected_rows, x=x, y=y,color='IMDB Rating',size=size)
+    
+    if (x=='Production Budget') and (y=='Worldwide Gross'):
+        limit=max(selected_rows[x].max(),selected_rows[y].max())
+        fig1.add_shape(type="line",
+              x0=0, 
+              y0=0, 
+              x1=limit, 
+              y1=limit)
+    elif (y=='Production Budget') and (x=='Worldwide Gross'):
+        limit=max(selected_rows[x].max(),selected_rows[y].max())
+        fig1.add_shape(type="line",
+              x0=0, 
+              y0=0, 
+              x1=limit, 
+              y1=limit)
     return fig1
 
 
